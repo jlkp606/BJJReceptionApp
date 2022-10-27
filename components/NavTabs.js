@@ -57,7 +57,7 @@ const StyledTab = styled((props) => <Tab disableRipple {...props} />)(
   }),
 );
 
-export default function NavTabs({ children }) {
+export default function NavTabs({ children, color="#383838" }) {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event, newValue) => {
@@ -73,7 +73,7 @@ export default function NavTabs({ children }) {
         height: 224,
       }}
     >
-      <Box sx={{ bgcolor: "#383838" }}>
+      <Box sx={{ bgcolor: color }}>
         <Tabs
           orientation="vertical"
           TabIndicatorProps={{style: {background:'#FFF'}}}
@@ -82,8 +82,8 @@ export default function NavTabs({ children }) {
           onChange={handleChange}
           aria-label="basic tabs example"
         >
-          {children.map((page, i) => (
-            <StyledTab selected={{style: {color: '#fff'}}} label={page.type.name} {...a11yProps(0)} />
+          {children.map((tab, i) => (
+            <StyledTab selected={{style: {color: '#fff'}}} label={tab.props.name} {...a11yProps(0)} />
           ))}
         </Tabs>
       </Box>
