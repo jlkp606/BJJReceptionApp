@@ -32,12 +32,12 @@ export default function DataTable({ data }) {
       })
     })
 
-    data.forEach((row) => {
+    data.itemData.forEach((row) => {
       table[row.Color][row.Size] = row.Quantity;
     });
     console.log(table);
   }
-  console.log(data);
+  console.log(data.itemData);
   
   
   populateTable();
@@ -95,7 +95,7 @@ export default function DataTable({ data }) {
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
           <TableRow>
-            <TableCell>{data[0].Item}</TableCell>
+            <TableCell>{data.itemData[0].Item}</TableCell>
             {Object.keys(table.White).map((size) => (
               <TableCell align="right">{size}</TableCell>
             ))}

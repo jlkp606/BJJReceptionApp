@@ -1,4 +1,7 @@
-const db = SQLite.openDatabase(
+
+import * as SQLite from "expo-sqlite";
+
+export const db = SQLite.openDatabase(
     {
       name: "MainDB.db",
       location: "default",
@@ -9,7 +12,7 @@ const db = SQLite.openDatabase(
     }
   );
 
-  const createTables = () => {
+const createTables = () => {
     console.log("create table");
     db.transaction((tx) => {
       tx.executeSql(
@@ -32,9 +35,20 @@ const db = SQLite.openDatabase(
         (err) => console.log(err)
       );
     });
+
+    db.transaction((tx) => {
+        tx.executeSql(
+          "CREATE TABLE IF NOT EXISTS " +
+            "Colors " +
+            "( Item VARCHAR(100) , Color VARCHAR(100), UNIQUE(Item, Color))",
+          [],
+          () => {},
+          (err) => console.log(err)
+        );
+      });
   };
 
-  const dropTables = () => {
+export const dropTables = () => {
     console.log("drop tables");
     db.transaction((tx) => {
       tx.executeSql(
@@ -52,15 +66,23 @@ const db = SQLite.openDatabase(
         (err) => console.log(err)
       );
     });
+    db.transaction((tx) => {
+        tx.executeSql(
+          "DROP TABLE IF EXISTS Colors",
+          [],
+          () => {},
+          (err) => console.log(err)
+        );
+      });
   };
 
-  const setData = () => {
+  const insertItemData = (Item="Kid Gis", ItemType="Gi", Color="Black", Size="XS", Quantity=20) => {
     console.log("set data");
     try {
       db.transaction((tx) => {
         tx.executeSql(
           "INSERT INTO Inventory (Item, ItemType, Color, Size, Quantity) VALUES (?,?,?,?,?)",
-          ["Adults Short Sleeve Rashguard","Rashguard", "White", "M", 20],
+          [Item, ItemType, Color, Size, Quantity],
           () => {},
           (err) => console.log(err)
         );
@@ -70,26 +92,76 @@ const db = SQLite.openDatabase(
       console.log(error);
     }
   };
-  const getData = () => {
-    console.log("get data1");
+
+  const insertSizeData = (item, size) => {
+    console.log("set data");
     try {
       db.transaction((tx) => {
-        console.log("get data2");
         tx.executeSql(
-          "SELECT * FROM Inventory",
-          [],
-          (tx, results) => {
-            console.log("get data3");
-            console.log(results);
-            setInventory(Array.from(results.rows));
-          },
-          (err) => {
-            console.log("Error");
-            console.log(err);
-          }
+          "INSERT INTO Sizes (Item, Size) VALUES (?,?)",
+          [item, size],
+          () => {},
+          (err) => console.log(err)
         );
       });
     } catch (error) {
+      console.log("error");
       console.log(error);
     }
   };
+
+  const insertColorData = (item, color) => {
+    console.log("set data");
+    try {
+      db.transaction((tx) => {
+        tx.executeSql(
+          "INSERT INTO Colors (Item, Color) VALUES (?,?)",
+          [item, color],
+          () => {},
+          (err) => console.log(err)
+        );
+      });
+    } catch (error) {
+      console.log("error");
+      console.log(error);
+    }
+  };
+
+  const populateColorAndSize = () => {
+    let sizes = {
+        "Adult Gis": ["F1","F2","F3","A0","A1","A1L","A2","A2L","A3","A3L","A4"],
+        "Kid Gis": ["M00","M0","M1","M2","M3","M4",],
+        "Adult Long Sleeve Rashguards": ["XS","S","M","L","XL","XXL","XXXL",],
+        "Kid Long Sleeve Rashguards": ["YXXS","YXS","S","YM","YL","YXL","YXXL",],
+        "Adult Short Sleeve Rashguards": ["XS","S","M","L","XL","XXL","XXXL",],
+        "Kid Short Sleeve Rashguards": ["YXXS","YXS","S","YM","YL","YXL","YXXL",],
+        "Adult Belts": ["A0","A1","A2","A3","A4",],
+        "Kid Belts": ["M0","M1","M2","M3","M4",],
+    } 
+
+    let colors = {
+        "Adult Gis": ["White","Blue","Black"],
+        "Kid Gis": ["White","Blue","Black"],
+        "Adult Long Sleeve Rashguards": ["White","Blue","Purple", "Brown", "Black"],
+        "Adult Short Sleeve Rashguards": ["White","Blue","Purple", "Brown", "Black"],
+        "Kid Long Sleeve Rashguards": ["White", "Grey","Yellow", "Orange", "Green"],
+        "Kid Short Sleeve Rashguards": ["White", "Grey","Yellow", "Orange", "Green"],
+        "Adult Belts": ["White","Blue","Purple", "Brown", "Black"],
+        "Kid Belts": ["White", "Grey-White","Grey","Grey-Black","Yellow-White", "Yellow", "Yellow-Black", "Orange", "Green"],
+    }
+    Object.keys(sizes).forEach(item => {
+        sizes[item].forEach(size => {
+            insertSizeData(item, size);
+        })
+        colors[item].forEach(color => {
+            insertColorData(item, color);
+        })
+    })
+  }
+
+export const initDB = () => {
+    // dropTables();
+    createTables();
+    populateColorAndSize()
+    insertItemData();
+}

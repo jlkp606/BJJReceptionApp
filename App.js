@@ -8,104 +8,40 @@ import Inventory from "./pages/Inventory";
 import Sales from "./pages/Sales";
 import Orders from "./pages/Orders";
 import Requests from "./pages/Requests";
-import * as SQLite from "expo-sqlite";
 import { useEffect, useState } from "react";
 import ReactLoading from 'react-loading';
+import {db, initDB , dropTables} from "./database";
 
-const db = SQLite.openDatabase(
-  {
-    name: "MainDB.db",
-    location: "default",
-  },
-  () => {},
-  (error) => {
-    console.log(error);
-  }
-);
 
 export default function App() {
-  const [inventory, setInventory] = useState(null);
+  const [inventory, setInventory] = useState({});
 
+  
   useEffect(() => {
-    // dropTables();
-    createTables();
-    setData();
-    getData();
+    initDB();
+
+    getColorData();
+    getItemData();
+    getSizeData();
+
+    //getSizeData();
+    //dropTables();
+    // console.log(inventory != null)
   }, []);
 
-  const createTables = () => {
-    console.log("create table");
-    db.transaction((tx) => {
-      tx.executeSql(
-        "CREATE TABLE IF NOT EXISTS " +
-          "Inventory " +
-          "(Item VARCHAR(100), ItemType VARCHAR(100), Color VARCHAR(100), Size VARCHAR(100), Quantity INTEGER, UNIQUE(Item, Color, Size))",
-        [],
-        () => {},
-        (err) => console.log(err)
-      );
-    });
-
-    db.transaction((tx) => {
-      tx.executeSql(
-        "CREATE TABLE IF NOT EXISTS " +
-          "Sizes " +
-          "( Item VARCHAR(100) , Size VARCHAR(100), UNIQUE(Item, Size))",
-        [],
-        () => {},
-        (err) => console.log(err)
-      );
-    });
-  };
-
-  const dropTables = () => {
-    console.log("drop tables");
-    db.transaction((tx) => {
-      tx.executeSql(
-        "DROP TABLE IF EXISTS Inventory",
-        [],
-        () => {},
-        (err) => console.log(err)
-      );
-    });
-    db.transaction((tx) => {
-      tx.executeSql(
-        "DROP TABLE IF EXISTS Sizes",
-        [],
-        () => {},
-        (err) => console.log(err)
-      );
-    });
-  };
-
-  const setData = () => {
-    console.log("set data");
-    try {
-      db.transaction((tx) => {
-        tx.executeSql(
-          "INSERT INTO Inventory (Item, ItemType, Color, Size, Quantity) VALUES (?,?,?,?,?)",
-          ["Adults Short Sleeve Rashguard","Rashguard", "White", "M", 20],
-          () => {},
-          (err) => console.log(err)
-        );
-      });
-    } catch (error) {
-      console.log("error");
-      console.log(error);
-    }
-  };
-  const getData = () => {
+  const getItemData = () => {
     console.log("get data1");
     try {
-      db.transaction((tx) => {
-        console.log("get data2");
+        db.transaction((tx) => {
         tx.executeSql(
           "SELECT * FROM Inventory",
           [],
           (tx, results) => {
             console.log("get data3");
-            console.log(results);
-            setInventory(Array.from(results.rows));
+            console.log(Array.from(results.rows));
+            setInventory(prevState => {
+              return {...prevState, itemData: Array.from(results.rows)};
+            });
           },
           (err) => {
             console.log("Error");
@@ -118,9 +54,58 @@ export default function App() {
     }
   };
 
+  const getSizeData = () => {
+    console.log("get data1");
+    try {
+        db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT * FROM Sizes",
+          [],
+          (tx, results) => {
+            console.log("get data3");
+            setInventory(prevState => {
+              return {...prevState, sizeData: Array.from(results.rows)};
+            });
+          },
+          (err) => {
+            console.log("Error");
+            console.log(err);
+          }
+        );
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const getColorData = () => {
+    console.log("get data1");
+    try {
+        db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT * FROM Colors",
+          [],
+          (tx, results) => {
+            console.log("get data3");
+            setInventory(prevState => {
+              return {...prevState, colorData: Array.from(results.rows)};
+            });
+            // setInventory({...inventory, colorData: Array.from(results.rows)});
+          },
+          (err) => {
+            console.log("Error");
+            console.log(err);
+          }
+        );
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
+
   return (
     <View style={styles.container}>
-      {inventory != null ? (
+      {inventory != {} && inventory.itemData != null && inventory.colorData != null && inventory.sizeData != null ? (
         <NavTabs>
           <Inventory name="Inventory" data={inventory} />
           <Sales name="Sales"/>
@@ -130,6 +115,7 @@ export default function App() {
       ) : (
         <ReactLoading type={"spinningBubbles"} color={"#000"} height={'20%'} width={'20%'} />
       )}
+      {inventory != null ? <>{console.log(inventory)}</>: <></>}
     </View>
   );
 }
@@ -145,11 +131,7 @@ const styles = StyleSheet.create({
 
 
 /**
- * tabs for types instead of names
  * 
- * database - add another table for sizing of the item ----> need insert sizes into the table
- * split into different tables
- * add categories to different things like Adult gis would have gi category
  * 
  * make a button/modal to add stuff to the database. using insert query
  */
