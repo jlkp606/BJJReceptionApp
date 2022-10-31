@@ -1,6 +1,7 @@
 
 import * as SQLite from "expo-sqlite";
 
+
 export const db = SQLite.openDatabase(
     {
       name: "MainDB.db",
@@ -11,6 +12,7 @@ export const db = SQLite.openDatabase(
       console.log(error);
     }
   );
+
 
 const createTables = () => {
     console.log("create table");
@@ -76,7 +78,7 @@ export const dropTables = () => {
       });
   };
 
-  const insertItemData = (Item="Kid Gis", ItemType="Gi", Color="Black", Size="XS", Quantity=20) => {
+  const insertItemData = (Item="Kid Gis", ItemType="Gi", Color="Black", Size="M1", Quantity=20) => {
     console.log("set data");
     try {
       db.transaction((tx) => {
@@ -92,6 +94,30 @@ export const dropTables = () => {
       console.log(error);
     }
   };
+
+  export const updateItemData = (item, color, size, quantity) => {
+    console.log(item)
+    console.log(color)
+    console.log(size)
+    console.log(quantity)
+    try {
+        db.transaction((tx) => {
+          tx.executeSql(
+            "UPDATE Inventory "+
+            "SET Quantity = ? "+
+            "WHERE Item = ? AND Color = ? AND Size = ?",
+            [quantity, item, color, size],
+            (tx, results) => {
+                console.log(results);
+              },
+            (err) => console.log(err)
+          );
+        });
+      } catch (error) {
+        console.log("error");
+        console.log(error);
+      }
+  }
 
   const insertSizeData = (item, size) => {
     console.log("set data");
@@ -127,28 +153,41 @@ export const dropTables = () => {
     }
   };
 
-  const populateColorAndSize = () => {
-    let sizes = {
-        "Adult Gis": ["F1","F2","F3","A0","A1","A1L","A2","A2L","A3","A3L","A4"],
-        "Kid Gis": ["M00","M0","M1","M2","M3","M4",],
-        "Adult Long Sleeve Rashguards": ["XS","S","M","L","XL","XXL","XXXL",],
-        "Kid Long Sleeve Rashguards": ["YXXS","YXS","S","YM","YL","YXL","YXXL",],
-        "Adult Short Sleeve Rashguards": ["XS","S","M","L","XL","XXL","XXXL",],
-        "Kid Short Sleeve Rashguards": ["YXXS","YXS","S","YM","YL","YXL","YXXL",],
-        "Adult Belts": ["A0","A1","A2","A3","A4",],
-        "Kid Belts": ["M0","M1","M2","M3","M4",],
-    } 
+let type = {
+    "Adult Gis": "Gis",
+    "Kid Gis": "Gis",
+    "Adult Long Sleeve Rashguards": "Rashguards",
+    "Kid Long Sleeve Rashguards": "Rashguards",
+    "Adult Short Sleeve Rashguards": "Rashguards",
+    "Kid Short Sleeve Rashguards": "Rashguards",
+    "Adult Belts": "Belts",
+    "Kid Belts": "Belts",
+}
 
-    let colors = {
-        "Adult Gis": ["White","Blue","Black"],
-        "Kid Gis": ["White","Blue","Black"],
-        "Adult Long Sleeve Rashguards": ["White","Blue","Purple", "Brown", "Black"],
-        "Adult Short Sleeve Rashguards": ["White","Blue","Purple", "Brown", "Black"],
-        "Kid Long Sleeve Rashguards": ["White", "Grey","Yellow", "Orange", "Green"],
-        "Kid Short Sleeve Rashguards": ["White", "Grey","Yellow", "Orange", "Green"],
-        "Adult Belts": ["White","Blue","Purple", "Brown", "Black"],
-        "Kid Belts": ["White", "Grey-White","Grey","Grey-Black","Yellow-White", "Yellow", "Yellow-Black", "Orange", "Green"],
-    }
+let sizes = {
+    "Adult Gis": ["F1","F2","F3","A0","A1","A1L","A2","A2L","A3","A3L","A4"],
+    "Kid Gis": ["M00","M0","M1","M2","M3","M4"],
+    "Adult Long Sleeve Rashguards": ["XS","S","M","L","XL","XXL","XXXL",],
+    "Kid Long Sleeve Rashguards": ["YXXS","YXS","S","YM","YL","YXL","YXXL",],
+    "Adult Short Sleeve Rashguards": ["XS","S","M","L","XL","XXL","XXXL",],
+    "Kid Short Sleeve Rashguards": ["YXXS","YXS","S","YM","YL","YXL","YXXL",],
+    "Adult Belts": ["A0","A1","A2","A3","A4",],
+    "Kid Belts": ["M0","M1","M2","M3","M4",],
+} 
+
+let colors = {
+    "Adult Gis": ["White","Blue","Black"],
+    "Kid Gis": ["White","Blue","Black"],
+    "Adult Long Sleeve Rashguards": ["White","Blue","Purple", "Brown", "Black"],
+    "Adult Short Sleeve Rashguards": ["White","Blue","Purple", "Brown", "Black"],
+    "Kid Long Sleeve Rashguards": ["White", "Grey","Yellow", "Orange", "Green"],
+    "Kid Short Sleeve Rashguards": ["White", "Grey","Yellow", "Orange", "Green"],
+    "Adult Belts": ["White","Blue","Purple", "Brown", "Black"],
+    "Kid Belts": ["White", "Grey-White","Grey","Grey-Black","Yellow-White", "Yellow", "Yellow-Black", "Orange", "Green"],
+}
+
+const populateColorAndSize = () => {
+    
     Object.keys(sizes).forEach(item => {
         sizes[item].forEach(size => {
             insertSizeData(item, size);
@@ -159,9 +198,20 @@ export const dropTables = () => {
     })
   }
 
+  const populateItems = () => {
+    Object.keys(sizes).forEach((item)=> {
+        sizes[item].forEach((size)=> {
+            colors[item].forEach((color) => {
+                insertItemData(item, type[item], color, size, 0)
+            })
+        })
+    })
+  }
+
 export const initDB = () => {
-    // dropTables();
+    //dropTables();
     createTables();
-    populateColorAndSize()
+    populateColorAndSize();
+    populateItems();
     insertItemData();
 }
