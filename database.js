@@ -48,6 +48,17 @@ const createTables = () => {
           (err) => console.log(err)
         );
       });
+
+      db.transaction((tx) => {
+        tx.executeSql(
+          "CREATE TABLE IF NOT EXISTS " +
+            "History " +
+            "( Item VARCHAR(100) , Quantity INTEGER, Color VARCHAR(100), Size VARCHAR(100), REASON VARCHAR(200), NOTE VARCHAR(200), TIME INTEGER)",
+          [],
+          () => {},
+          (err) => console.log(err)
+        );
+      });
   };
 
 export const dropTables = () => {
@@ -79,7 +90,6 @@ export const dropTables = () => {
   };
 
   const insertItemData = (Item="Kid Gis", ItemType="Gi", Color="Black", Size="M1", Quantity=20) => {
-    console.log("set data");
     try {
       db.transaction((tx) => {
         tx.executeSql(
@@ -96,10 +106,6 @@ export const dropTables = () => {
   };
 
   export const updateItemData = (item, color, size, quantity) => {
-    console.log(item)
-    console.log(color)
-    console.log(size)
-    console.log(quantity)
     try {
         db.transaction((tx) => {
           tx.executeSql(
@@ -108,7 +114,6 @@ export const dropTables = () => {
             "WHERE Item = ? AND Color = ? AND Size = ?",
             [quantity, item, color, size],
             (tx, results) => {
-                console.log(results);
               },
             (err) => console.log(err)
           );
@@ -210,8 +215,8 @@ const populateColorAndSize = () => {
 
 export const initDB = () => {
     //dropTables();
-    createTables();
-    populateColorAndSize();
-    populateItems();
-    insertItemData();
+    //createTables();
+    //populateColorAndSize();
+    //populateItems();
+    //insertItemData();
 }

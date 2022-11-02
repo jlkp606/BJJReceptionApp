@@ -107,7 +107,7 @@ export default function App() {
     <View style={styles.container}>
       {inventory != {} && inventory.itemData != null && inventory.colorData != null && inventory.sizeData != null ? (
         <NavTabs>
-          <Inventory name="Inventory" data={inventory} />
+          <Inventory name="Inventory" data={inventory} getItemData={getItemData}/>
           <Sales name="Sales"/>
           <Orders name="Orders"/>
           <Requests name="Requests"/>

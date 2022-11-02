@@ -71,16 +71,19 @@ export default function NavTabs({ children, color="#383838" }) {
         bgcolor: "background.paper",
         display: "flex",
         height: 224,
+        border: '1px dashed grey',
       }}
     >
-      <Box sx={{ bgcolor: color }}>
+      <Box sx={{ bgcolor: color, border: '3px dashed red' }}>
         <Tabs
+        sx={{padding: '0px', margin: '0px'}}
           orientation="vertical"
           TabIndicatorProps={{style: {background:'#FFF'}}}
           value={value}
           textColor='inherit'
           onChange={handleChange}
           aria-label="basic tabs example"
+          
         >
           {children.map((tab, i) => (
             <StyledTab selected={{style: {color: '#fff'}}} label={tab.props.name} {...a11yProps(0)} />

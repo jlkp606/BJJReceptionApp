@@ -9,12 +9,9 @@ import Paper from "@mui/material/Paper";
 import BasicModal from "./BasicModal";
 import { useEffect } from "react";
 
-export default function DataTable({ data, sizeData, colorData}) {
+export default function DataTable({ data, sizeData, colorData, getItemData}) {
   
-  // useEffect(()=> {
-  //   console.log("in");
-  //   populateTable();
-  // }, [])
+  
 
   let table = {};
 
@@ -30,12 +27,8 @@ export default function DataTable({ data, sizeData, colorData}) {
     data.forEach((row) => {
       table[row.Color][row.Size] = row.Quantity;
     });
-    console.log(table);
   }
   
-  
-  console.log(colorData);
-  console.log(data);
   populateTable();
   
 
@@ -45,7 +38,7 @@ export default function DataTable({ data, sizeData, colorData}) {
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
           <TableRow>
-            <TableCell>{data[0].Item}</TableCell>
+            <TableCell style={{ fontWeight: 'bold' }} >{data[0].Item}</TableCell>
             {Object.keys(table[Object.keys(table)[0]]).map((size) => (
               <TableCell align="right">{size}</TableCell>
             ))}
@@ -61,7 +54,7 @@ export default function DataTable({ data, sizeData, colorData}) {
                 {color}
               </TableCell>
               {Object.keys(table[color]).map((size) => (
-                <TableCell align="right"> <BasicModal value={table[color][size]} color={color} size={size} item={data[0].Item}></BasicModal></TableCell>
+                <TableCell align="right"> <BasicModal value={table[color][size]} color={color} size={size} item={data[0].Item} getItemData={getItemData}></BasicModal></TableCell>
               ))}
             </TableRow>
           ))}

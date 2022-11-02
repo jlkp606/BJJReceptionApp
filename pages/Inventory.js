@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { Stack } from "@mui/material";
 import NavTabs from "../components/NavTabs";
 import BasicTable from "../components/BasicTable";
 import DataTable from "../components/DataTable";
 import Orders from "./Orders";
 
-export default function Inventory({ data }) {
+export default function Inventory({ data , getItemData}) {
   const [itemData, setItemData] = useState({});
   const [sizeData, setSizeData] = useState({});
   const [colorData, setColorData] = useState({});
@@ -30,7 +31,6 @@ export default function Inventory({ data }) {
             first[Item].itemData != null
               ? [second, ...first[Item].itemData]
               : [second];
-          console.log(first);
           return first;
         },
         {}
@@ -52,14 +52,8 @@ export default function Inventory({ data }) {
       first[Item].push(second.Color);
       return first;
     }, {});
-    console.log(coloring)
 
     setColorData(coloring);
-
-    console.log(data.colorData)
-    console.log(newItemData);
-    console.log(dataGroupedByType);
-    console.log(data);
     setItemData(newItemData);
   }, [data]);
 
@@ -69,10 +63,12 @@ export default function Inventory({ data }) {
         <NavTabs color="#A0A0A0">
         {Object.keys(itemData).map((itemType) => (
           <div name={itemType} >
+            <Stack spacing={2}>
             {Object.keys(itemData[itemType]).map((item) => (
-              <DataTable data={itemData[itemType][item].itemData} sizeData={sizeData[item]} colorData={colorData[item]} />
+              <DataTable data={itemData[itemType][item].itemData} sizeData={sizeData[item]} colorData={colorData[item] } getItemData={getItemData} />
             )
           )}
+          </Stack>
           </div>
         ))}
       </NavTabs>

@@ -26,10 +26,18 @@ const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-export default function BasicModal({ value, color, size, item }) {
+export default function BasicModal({ value, color, size, item, getItemData}) {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setError(false);
+    setValues({
+      quantity: value,
+      reason: "Sale",
+      notes: "",
+    })
+    setOpen(false)};
+  const [error, setError] = React.useState(false);
 
   const [snackBarOpen, setSnackBarOpen] = React.useState(false);
 
@@ -40,9 +48,16 @@ export default function BasicModal({ value, color, size, item }) {
   });
 
   const handleUpdate = () => {
-    updateItemData(item, color, size, values.quantity);
-    setSnackBarOpen(true);
-    handleClose();
+
+    if (values.quantity != "" && values.reason != ""){
+      updateItemData(item, color, size, values.quantity);
+      console.log(Date.now());
+      getItemData();
+      setSnackBarOpen(true);
+      handleClose();
+    } else {
+      setError(true);
+    }
   };
 
   const handleSnackBarClose = (event, reason) => {
@@ -67,12 +82,17 @@ export default function BasicModal({ value, color, size, item }) {
             <Typography id="modal-modal-title" variant="h6" component="h2">
               {size}-{color} {item}
             </Typography>
+            {error ? <Typography id="modal-modal-title" variant="body2" component="h2" color="red">
+              Error: Please fill in the boxes correctly
+            </Typography> : <></> }
+            
             <TextField
+              error={error}
               onChange={(newValue) =>
                 setValues({ ...values, quantity: newValue.target.value })
               }
               required
-              id="outlined-number"
+              id="quantity"
               label="Number"
               type="number"
               value={values.quantity}
@@ -90,11 +110,12 @@ export default function BasicModal({ value, color, size, item }) {
               renderInput={(params) => (
                 <TextField
                 {...params}
+                error={error}
                   onChange={(newValue) =>
                     setValues({ ...values, reason: newValue.target.value })
                   }
                   required
-                  id="outlined-required"
+                  id="reason"
                   label="Reason"
                   value={values.reason}
                 />
@@ -105,7 +126,7 @@ export default function BasicModal({ value, color, size, item }) {
               onChange={(newValue) =>
                 setValues({ ...values, notes: newValue.target.value })
               }
-              id="outlined-multiline-flexible"
+              id="notes"
               label="Notes"
               multiline
               maxRows={4}
